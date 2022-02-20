@@ -127,11 +127,11 @@ namespace Cypher
         public string Tagline { get; set; }
         public int Released { get; set; }
 
-        public IEnumerable<(ACTED_IN relationship, Person person)> Actors { get; }  // we want to know the role the actor had
-        public IEnumerable<Person> DirectedBy { get; }                 // this relationship doesn't have roles, we just want the node
-        public IEnumerable<Person> WrittenBy { get; }
-        public IEnumerable<Person> ProducedBy { get; }
-        public IEnumerable<(REVIEWED relationship, Person person)> ReviewedBy { get; }
+        public IQueryable<(ACTED_IN relationship, Person person)> Actors { get; }  // we want to know the role the actor had
+        public IQueryable<Person> DirectedBy { get; }                 // this relationship doesn't have roles, we just want the node
+        public IQueryable<Person> WrittenBy { get; }
+        public IQueryable<Person> ProducedBy { get; }
+        public IQueryable<(REVIEWED relationship, Person person)> ReviewedBy { get; }
     }
 
     [Label("Person")]
@@ -141,15 +141,17 @@ namespace Cypher
         public string Name { get; set; }
         public int? Born { get; set; }
 
-        public IEnumerable<(ACTED_IN relationship, Movie movie)> ActedIn { get; }
-        public IEnumerable<Movie> Directed { get; }
-        public IEnumerable<Movie> Wrote { get; }
-        public IEnumerable<Movie> Produced { get; }
-        public IEnumerable<(REVIEWED relationship, Movie movie)> Reviewed { get; }
+        public IQueryable<(ACTED_IN relationship, Movie movie)> ActedIn { get; }
+        public IQueryable<Movie> Directed { get; }
+        public IQueryable<Movie> Wrote { get; }
+        public IQueryable<Movie> Produced { get; }
+        public IQueryable<(REVIEWED relationship, Movie movie)> Reviewed { get; }
     }
 
-    public interface IDatabase { }
-    public interface INodeSet<T>
+    public abstract class IDatabase {
+        public T? Query<T>(string cypher) => default;
+    }
+    public abstract class INodeSet<T>
     {
         // this will perform the following actions:
         // 1. find node label; this will be `typeof(T)`, find `Label` attribute, use `Name` property: OR use type name if no `Label` attribute
@@ -157,7 +159,7 @@ namespace Cypher
         // 3. sanitize match expression, if necessary
         // 4. build and run query expression
         // 5. deserialize and return response
-        T Find(Expression<Func<T, bool>> expression);
+        public T? Find(Expression<Func<T, bool>> expression) => default;
 
         // this will perform the following actions:
         // 1. if an expression is provided
@@ -166,7 +168,7 @@ namespace Cypher
         //    3. sanitize match expression, if necessary
         // 2. build and run query expression
         // 3. deserialize and return response
-        IEnumerable<T> FindAll(Expression<Func<T, bool>>? expression = null);
+        public IReadOnlyList<T> FindAll(Expression<Func<T, bool>>? expression = null) => new List<T>();
 
         // this will perform the following actions:
         // 1. if an expression is provided
@@ -175,7 +177,7 @@ namespace Cypher
         //    3. sanitize match expression, if necessary
         // 2. build and run query expression
         // 3. deserialize and return response
-        int Count(Expression<Func<T, bool>>? expression = null);
+        public int Count(Expression<Func<T, bool>>? expression = null) => 0;
     }
 
     public class Database : IDatabase
@@ -188,12 +190,25 @@ namespace Cypher
     {
         public void Main() {
             Database database = null!;
-            var person = database.Persons.Find(a => a.Name == "Tom Cruise");  // runs cypher `match (n:Person { name: "Tom Cruise" }) return n limit 1`
-            var actedIn = person.ActedIn;                                     // runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(m) return r, m`
-            var movies = person.ActedIn.Select(s => s.movie);                 // runs cypher `match (:Person { name: "Tom Cruise" })-[:ACTED_IN]->(m:Movie) return m`
-            var movieRoles = person.ActedIn.First().relationship.Roles;       // runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(:Movie) return r.roles limit 1`
 
-            var actedInMovieCount = database.Persons.Count();                 // runs cypher `match (n:Person) return count(n)`
+            // runs cypher `match (n:Person { name: "Tom Cruise" }) return n limit 1`
+            var person = database.Persons.Find(a => a.Name == "Tom Cruise")!;
+
+            // runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(m) return r, m`
+            var actedIn = person.ActedIn;
+
+            // runs cypher `match (:Person { name: "Tom Cruise" })-[:ACTED_IN]->(m:Movie) return m`
+            var movies = person.ActedIn.Select(s => s.movie);
+
+            // runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(:Movie) return r.roles limit 1`
+            var movieRoles = person.ActedIn.First().relationship.Roles;
+
+            // runs cypher `match (n:Person) return count(n)`
+            var actedInMovieCount = database.Persons.Count();
+
+            // runs provided cypher
+            var unsupportedQuery = database
+                .Query<int>("match (:Person)-[r]->(:Movie) return count(r)");
         }
     }
 }
