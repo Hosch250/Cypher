@@ -87,8 +87,9 @@ namespace Cypher
     {
         public static async Task Main() {
             Database database = new();
-            var person = await database.Persons.Find(f => f.Name == "Danny DeVito");
-            var movie = await database.Movies.Find(f => f.Title == "...");
+            var tomCruise = await database.Persons.Find(f => f.Name == "Tom Cruise");
+            var dannyDeVito = await database.Persons.Find(f => f.Name == "Danny DeVito");
+            var movie = await database.Movies.Find(f => f.Title == "Top Gun");
 
             var persons = await database.Persons.FindAll();
             var movies = await database.Movies.FindAll();

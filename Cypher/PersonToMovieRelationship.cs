@@ -1,17 +1,22 @@
 ﻿namespace Cypher
 {
-    public abstract record PersonToMovieRelationship
+    public abstract class PersonToMovieRelationship : Node
     {
-        public record ACTED_IN(IReadOnlyList<string> Roles) : PersonToMovieRelationship { }
-        public record DIRECTED : PersonToMovieRelationship { }
-        public record WROTE : PersonToMovieRelationship { }
-        public record PRODUCED : PersonToMovieRelationship { }
-        public record REVIEWED(int Rating, string Summary) : PersonToMovieRelationship { }
+        public class ACTED_IN : PersonToMovieRelationship
+        {
+            [Newtonsoft.Json.JsonProperty("roles")]
+            public List<string> Roles { get; set; }
+        }
+        public class DIRECTED : PersonToMovieRelationship { }
+        public class WROTE : PersonToMovieRelationship { }
+        public class PRODUCED : PersonToMovieRelationship { }
+        public class REVIEWED : PersonToMovieRelationship
+        {
+            [Newtonsoft.Json.JsonProperty("rating")]
+            public int Rating { get; set; }
 
-        public static ACTED_IN ActedIn(IReadOnlyList<string> Roles) => new(Roles);
-        public static DIRECTED Directed => new();
-        public static WROTE Wrote => new();
-        public static PRODUCED Produced => new();
-        public static REVIEWED Reviewed(int Rating, string Summary) => new(Rating, Summary);
+            [Newtonsoft.Json.JsonProperty("summary")]
+            public string Summary { get; set; }
+        }
     }
 }

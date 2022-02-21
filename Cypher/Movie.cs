@@ -5,7 +5,6 @@
     [Label("Movie")]
     public class Movie : Node
     {
-        [Key]
         [Newtonsoft.Json.JsonProperty("title")]
         public string Title { get; set; }
 
@@ -15,10 +14,19 @@
         [Newtonsoft.Json.JsonProperty("released")]
         public int Released { get; set; }
 
-        public virtual IQueryable<(ACTED_IN relationship, Person person)> Actors { get; }   // we want to know the role the actor had
-        public virtual IQueryable<Person> DirectedBy { get; }                               // this relationship doesn't have roles, we just want the node
-        public virtual IQueryable<Person> WrittenBy { get; }
-        public virtual IQueryable<Person> ProducedBy { get; }
-        public virtual IQueryable<(REVIEWED relationship, Person person)> ReviewedBy { get; }
+        [Relationship(nameof(ACTED_IN), "TO")]
+        public virtual IEnumerable<(ACTED_IN relationship, Person person)> Actors => this.GetNodesWithRelationship<ACTED_IN, Person>();
+
+        [Relationship(nameof(DIRECTED), "TO")]
+        public virtual IEnumerable<Person> DirectedBy => this.GetNodesByRelationship<Person>();
+
+        [Relationship(nameof(WROTE), "TO")]
+        public virtual IEnumerable<Person> WrittenBy => this.GetNodesByRelationship<Person>();
+
+        [Relationship(nameof(PRODUCED), "TO")]
+        public virtual IEnumerable<Person> ProducedBy => this.GetNodesByRelationship<Person>();
+
+        [Relationship(nameof(REVIEWED), "TO")]
+        public virtual IEnumerable<(REVIEWED relationship, Person person)> ReviewedBy => this.GetNodesWithRelationship<REVIEWED, Person>();
     }
 }
