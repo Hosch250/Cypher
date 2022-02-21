@@ -1,5 +1,13 @@
 ﻿namespace Cypher
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class RelationshipAttribute : Attribute { }
+    [AttributeUsage(AttributeTargets.Property)]
+    public class RelationshipAttribute : Attribute
+    {
+        public RelationshipAttribute(string relationship)
+        {
+            Relationship = relationship;
+        }
+
+        public string Relationship { get; }
+    }
 }

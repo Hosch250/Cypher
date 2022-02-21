@@ -3,7 +3,7 @@
     using static PersonToMovieRelationship;
 
     [Label("Movie")]
-    public class Movie
+    public class Movie : Node
     {
         [Key]
         [Newtonsoft.Json.JsonProperty("title")]

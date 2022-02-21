@@ -87,7 +87,7 @@ namespace Cypher
     {
         public static async Task Main() {
             Database database = new();
-            var person = await database.Persons.Find(f => f.Name == "Tom Cruise");
+            var person = await database.Persons.Find(f => f.Name == "Danny DeVito");
             var movie = await database.Movies.Find(f => f.Title == "...");
 
             var persons = await database.Persons.FindAll();
@@ -95,7 +95,6 @@ namespace Cypher
 
             var personsC = await database.Persons.Count();
             var moviesC = await database.Movies.Count();
-
 
             //// runs cypher `match (n:Person { name: "Tom Cruise" }) return n limit 1`
             //var person = database.Persons.Find(a => a.Name == "Tom Cruise")!;

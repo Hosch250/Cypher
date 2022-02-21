@@ -50,7 +50,7 @@
         }
     }
 
-    public class NodeSet<T> where T : class
+    public class NodeSet<T> where T : Node
     {
         // this will perform the following actions:
         // 1. find node label; this will be `typeof(T)`, find `Label` attribute, use `Name` property: OR use type name if no `Label` attribute
@@ -73,11 +73,15 @@
                 .Match($"(data: {label} {filter})")
                 .Return((data) => new
                 {
-                    data = Return.As<T>("data")
+                    data = Return.As<T>("data"),
+                    id = data.Id()
                 })
                 .Limit(1);
 
-            return (await query.ResultsAsync).FirstOrDefault()?.data;
+            return (await query.ResultsAsync).Select(s => {
+                s.data.Identity = s.id;
+                return s.data;
+            }).FirstOrDefault();
         }
 
         // this will perform the following actions:
@@ -97,13 +101,17 @@
                 : typeof(T).Name;
 
             var query = client.Cypher
-                .Match($"(data: {label})")
+                .Match($"(data:{label})")
                 .Return((data) => new
                 {
-                    data = Return.As<T>("data")
+                    data = Return.As<T>("data"),
+                    id = data.Id()
                 });
 
-            return (await query.ResultsAsync).Select(s => s.data).ToList()!;
+            return (await query.ResultsAsync).Select(s => {
+                s.data.Identity = s.id;
+                return s.data;
+            }).ToList()!;
         }
 
         // this will perform the following actions:

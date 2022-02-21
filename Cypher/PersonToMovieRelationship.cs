@@ -1,6 +1,5 @@
 ﻿namespace Cypher
 {
-    [Relationship]
     public abstract record PersonToMovieRelationship
     {
         public record ACTED_IN(IReadOnlyList<string> Roles) : PersonToMovieRelationship { }
