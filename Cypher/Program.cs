@@ -88,20 +88,21 @@ namespace Cypher
         public static async Task Main() {
             Database database = new();
             var tomCruise = await database.Persons.Find(f => f.Name == "Tom Cruise");
-            var dannyDeVito = await database.Persons.Find(f => f.Name == "Danny DeVito");
+            var dannyDeVito = await database.Persons.Find(f => f.Name == "Danny DeVito" && f.Born == 1944);
             var movie = await database.Movies.Find(f => f.Title == "Top Gun");
 
             var persons = await database.Persons.FindAll();
             var movies = await database.Movies.FindAll();
+            var moviesFiltered = await database.Movies.FindAll(a => a.Title == "Top Gun" || a.Title == "A Few Good Men");
 
             var personsC = await database.Persons.Count();
             var moviesC = await database.Movies.Count();
 
-            //// runs cypher `match (n:Person { name: "Tom Cruise" }) return n limit 1`
-            //var person = database.Persons.Find(a => a.Name == "Tom Cruise")!;
+            // runs cypher `match (n:Person) where n.name = "Tom Cruise" return n limit 1`
+            var person = await database.Persons.Find(a => a.Name == "Tom Cruise")!;
 
-            //// runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(m) return r, m`
-            //var actedIn = person.ActedIn;
+            // runs cypher `match (n:Person)-[r:ACTED_IN]->(m) where id(n) = 123 return r, m` (assuming the node's id is 123)
+            var actedIn = person?.ActedIn;
 
             //// runs cypher `match (:Person { name: "Tom Cruise" })-[:ACTED_IN]->(m:Movie) return m`
             //var movies = person.ActedIn.Select(s => s.movie);
@@ -109,13 +110,13 @@ namespace Cypher
             //// runs cypher `match (:Person { name: "Tom Cruise" })-[r:ACTED_IN]->(:Movie) return r.roles limit 1`
             //var movieRoles = person.ActedIn.First().relationship.Roles;
 
-            //// runs cypher `match (n:Person) return count(n)`
-            //var actedInMovieCount = database.Persons.Count();
+            // runs cypher `match (n:Person) return count(n)`
+            var actedInMovieCount = await database.Persons.Count(x => x.Name == "Tom Cruise");
 
             // runs provided cypher
             //var unsupportedQuery = await database
             //    .Query<int>("match (:Person)-[r]->(:Movie) return count(r)");
-            
+
             var x = 0;
         }
     }

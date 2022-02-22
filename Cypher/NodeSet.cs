@@ -2,53 +2,6 @@
 {
     using Neo4jClient.Cypher;
     using System.Linq.Expressions;
-    using System.Text;
-
-    public static class ExpressionParser
-    {
-        public static string Parse<T>(Expression<Func<T, bool>> expression)
-        {
-            var builder = new StringBuilder();
-            builder.Append('{');
-
-            Listener(builder, (dynamic)expression.Body);
-
-            builder.Append('}');
-
-            return builder.ToString();
-        }
-
-        public static void Listener(StringBuilder builder, BinaryExpression expression)
-        {
-            Listener(builder, (dynamic)expression.Left);
-            Listener(builder, (dynamic)expression.Right);
-        }
-
-        public static void Listener(StringBuilder builder, ConstantExpression expression)
-        {
-            var dict = new Dictionary<Type, Action>
-            {
-                [typeof(string)] = () => builder.Append($"\"{expression.Value}\""),
-                [typeof(int)] = () => builder.Append(expression.Value),
-            };
-
-            dict[expression.Type]();
-        }
-
-        public static void Listener(StringBuilder builder, MemberExpression expression)
-        {
-            var name = expression.Member.GetCustomAttributes(typeof(Newtonsoft.Json.JsonPropertyAttribute), false).FirstOrDefault() is Newtonsoft.Json.JsonPropertyAttribute jpa
-                ? jpa.PropertyName
-                : expression.Member.Name;
-
-            builder.Append(name + ": ");
-        }
-
-        public static string Listener(StringBuilder builder, Expression expression)
-        {
-            throw new NotImplementedException($"Expression node {expression.NodeType} not supported");
-        }
-    }
 
     public class NodeSet<T> where T : Node
     {
@@ -67,18 +20,22 @@
                 ? labelAttr.Name
                 : typeof(T).Name;
 
-            var filter = ExpressionParser.Parse(expression);
+            var nodeName = expression?.Parameters[0].Name ?? "data";
+            var query = client.Cypher.Match($"({nodeName}:{label})");
 
-            var query = client.Cypher
-                .Match($"(data: {label} {filter})")
-                .Return((data) => new
+            if (expression is not null)
+            {
+                query = query.Where(expression);
+            }
+
+            var queryReturn = query.Return(() => new
                 {
-                    data = Return.As<T>("data"),
-                    id = data.Id()
+                    data = Return.As<T>(nodeName),
+                    id = Return.As<long>($"id({nodeName})")
                 })
                 .Limit(1);
 
-            return (await query.ResultsAsync).Select(s => {
+            return (await queryReturn.ResultsAsync).Select(s => {
                 s.data.Identity = s.id;
                 return s.data;
             }).FirstOrDefault();
@@ -100,15 +57,20 @@
                 ? labelAttr.Name
                 : typeof(T).Name;
 
-            var query = client.Cypher
-                .Match($"(data:{label})")
-                .Return((data) => new
+            var nodeName = expression?.Parameters[0].Name ?? "data";
+            var query = client.Cypher.Match($"({nodeName}:{label})");
+
+            if (expression is not null)
+            {
+                query = query.Where(expression);
+            }
+            var queryReturn = query.Return((data) => new
                 {
-                    data = Return.As<T>("data"),
-                    id = data.Id()
+                    data = Return.As<T>(nodeName),
+                    id = Return.As<long>($"id({nodeName})")
                 });
 
-            return (await query.ResultsAsync).Select(s => {
+            return (await queryReturn.ResultsAsync).Select(s => {
                 s.data.Identity = s.id;
                 return s.data;
             }).ToList()!;
@@ -130,14 +92,20 @@
                 ? labelAttr.Name
                 : typeof(T).Name;
 
-            var query = client.Cypher
-                .Match($"(data: {label})")
-                .Return((data) => new
+            var nodeName = expression?.Parameters[0].Name ?? "data";
+            var query = client.Cypher.Match($"({nodeName}:{label})");
+
+            if (expression is not null)
+            {
+                query = query.Where(expression);
+            }
+
+            var queryReturn = query.Return((data) => new
                 {
-                    data = data.Count()
+                    data = Return.As<int>($"count({nodeName})")
                 });
 
-            return (await query.ResultsAsync).First().data;
+            return (await queryReturn.ResultsAsync).First().data;
         }
     }
 }
