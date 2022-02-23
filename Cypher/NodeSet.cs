@@ -5,12 +5,6 @@
 
     public class NodeSet<T> where T : Node
     {
-        // this will perform the following actions:
-        // 1. find node label; this will be `typeof(T)`, find `Label` attribute, use `Name` property: OR use type name if no `Label` attribute
-        // 2. evaluate expression into json match; todo: create/apply attribute to override property name
-        // 3. sanitize match expression, if necessary
-        // 4. build and run query expression
-        // 5. deserialize and return response
         public async ValueTask<T?> Find(Expression<Func<T, bool>> expression)
         {
             var client = new Neo4jClient.GraphClient(new Uri("http://localhost:7474"));
@@ -41,13 +35,6 @@
             }).FirstOrDefault();
         }
 
-        // this will perform the following actions:
-        // 1. if an expression is provided
-        //    1. find node label; this will be `typeof(T)`, find `Label` attribute, use `Name` property: OR use type name if no `Label` attribute
-        //    2. evaluate expression into json match; todo: create/apply attribute to override property name
-        //    3. sanitize match expression, if necessary
-        // 2. build and run query expression
-        // 3. deserialize and return response
         public async ValueTask<IReadOnlyList<T>> FindAll(Expression<Func<T, bool>>? expression = null)
         {
             var client = new Neo4jClient.GraphClient(new Uri("http://localhost:7474"));
@@ -76,13 +63,6 @@
             }).ToList()!;
         }
 
-        // this will perform the following actions:
-        // 1. if an expression is provided
-        //    1. find node label; this will be `typeof(T)`, find `Label` attribute, use `Name` property: OR use type name if no `Label` attribute
-        //    2. evaluate expression into json match; todo: create/apply attribute to override property name
-        //    3. sanitize match expression, if necessary
-        // 2. build and run query expression
-        // 3. deserialize and return response
         public async ValueTask<long> Count(Expression<Func<T, bool>>? expression = null)
         {
             var client = new Neo4jClient.GraphClient(new Uri("http://localhost:7474"));
