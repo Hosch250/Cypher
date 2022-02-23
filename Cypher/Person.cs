@@ -11,19 +11,19 @@
         [Newtonsoft.Json.JsonProperty("born")]
         public int? Born { get; set; }
 
-        [Relationship(nameof(ACTED_IN), "FROM")]
+        [Relationship(nameof(ACTED_IN), Direction.From)]
         public virtual IReadOnlyList<(ACTED_IN relationship, Movie movie)> ActedIn => this.GetNodesWithRelationship<ACTED_IN, Movie>();
 
-        [Relationship(nameof(DIRECTED), "FROM")]
+        [Relationship(nameof(DIRECTED), Direction.From)]
         public virtual IReadOnlyList<Movie> Directed => this.GetNodesByRelationship<Movie>();
 
-        [Relationship(nameof(WROTE), "FROM")]
+        [Relationship(nameof(WROTE), Direction.From)]
         public virtual IReadOnlyList<Movie> Wrote => this.GetNodesByRelationship<Movie>();
 
-        [Relationship(nameof(PRODUCED), "FROM")]
+        [Relationship(nameof(PRODUCED), Direction.From)]
         public virtual IReadOnlyList<Movie> Produced => this.GetNodesByRelationship<Movie>();
 
-        [Relationship(nameof(REVIEWED), "FROM")]
+        [Relationship(nameof(REVIEWED), Direction.From)]
         public virtual IReadOnlyList<(REVIEWED relationship, Movie movie)> Reviewed => this.GetNodesWithRelationship<REVIEWED, Movie>();
     }
 }

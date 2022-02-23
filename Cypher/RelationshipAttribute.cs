@@ -1,15 +1,17 @@
 ﻿namespace Cypher
 {
+    public enum Direction { From, To}
+
     [AttributeUsage(AttributeTargets.Property)]
     public class RelationshipAttribute : Attribute
     {
-        public RelationshipAttribute(string relationship, string direction)
+        public RelationshipAttribute(string relationship, Direction direction)
         {
             Relationship = relationship;
             Direction = direction;
         }
 
         public string Relationship { get; }
-        public string Direction { get; }
+        public Direction Direction { get; }
     }
 }

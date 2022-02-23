@@ -14,18 +14,18 @@
             var relationship = node.GetType().GetProperty(callerMemberName)!.GetCustomAttributes(typeof(RelationshipAttribute), false).FirstOrDefault() as RelationshipAttribute;
             if (relationship is null) { throw new Exception(); }
 
-            var fromType = relationship.Direction == "FROM" ? node.GetType() : typeof(TResponse);
+            var fromType = relationship.Direction == Direction.From ? node.GetType() : typeof(TResponse);
             var fromLabel = fromType.GetCustomAttributes(typeof(LabelAttribute), false).FirstOrDefault() is LabelAttribute labelAttr
                 ? labelAttr.Name
                 : fromType.Name;
 
-            var toType = relationship.Direction == "FROM" ? typeof(TResponse) : node.GetType();
+            var toType = relationship.Direction == Direction.From ? typeof(TResponse) : node.GetType();
             var toLabel = toType.GetCustomAttributes(typeof(LabelAttribute), false).FirstOrDefault() is LabelAttribute labelAttr1
                 ? labelAttr1.Name
                 : toType.Name;
 
-            fromLabel = relationship.Direction == "FROM" ? $"known:{fromLabel}" : $"data:{fromLabel}";
-            toLabel = relationship.Direction == "TO" ? $"known:{toLabel}" : $"data:{toLabel}";
+            fromLabel = relationship.Direction == Direction.From ? $"known:{fromLabel}" : $"data:{fromLabel}";
+            toLabel = relationship.Direction == Direction.To ? $"known:{toLabel}" : $"data:{toLabel}";
 
             var query = client.Cypher
                 .Match($"({fromLabel})-[:{relationship.Relationship}]->({toLabel})")
@@ -52,18 +52,18 @@
             var relationship = node.GetType().GetProperty(callerMemberName)!.GetCustomAttributes(typeof(RelationshipAttribute), false).FirstOrDefault() as RelationshipAttribute;
             if (relationship is null) { throw new Exception(); }
 
-            var fromType = relationship.Direction == "FROM" ? node.GetType() : typeof(TNodeResponse);
+            var fromType = relationship.Direction == Direction.From ? node.GetType() : typeof(TNodeResponse);
             var fromLabel = fromType.GetCustomAttributes(typeof(LabelAttribute), false).FirstOrDefault() is LabelAttribute labelAttr
                 ? labelAttr.Name
                 : fromType.Name;
 
-            var toType = relationship.Direction == "FROM" ? typeof(TNodeResponse) : node.GetType();
+            var toType = relationship.Direction == Direction.From ? typeof(TNodeResponse) : node.GetType();
             var toLabel = toType.GetCustomAttributes(typeof(LabelAttribute), false).FirstOrDefault() is LabelAttribute labelAttr1
                 ? labelAttr1.Name
                 : toType.Name;
 
-            fromLabel = relationship.Direction == "FROM" ? $"known:{fromLabel}" : $"data:{fromLabel}";
-            toLabel = relationship.Direction == "TO" ? $"known:{toLabel}" : $"data:{toLabel}";
+            fromLabel = relationship.Direction == Direction.From ? $"known:{fromLabel}" : $"data:{fromLabel}";
+            toLabel = relationship.Direction == Direction.To ? $"known:{toLabel}" : $"data:{toLabel}";
 
             var query = client.Cypher
                 .Match($"({fromLabel})-[r:{relationship.Relationship}]->({toLabel})")
